@@ -23,7 +23,7 @@ class AddAdditionalColumnsToOrdersTable extends Migration
             $table->string('processed_at')->nullable();
             $table->string('processing_method')->nullable();
             $table->string('tags')->nullable();
-            $table->string('discount_applications')->nullable();
+            $table->longText('discount_applications')->nullable();;
             $table->string('total_shipping_price_set')->nullable();
             $table->string('total_price_set')->nullable();
             $table->string('total_tax_set')->nullable();
