@@ -214,7 +214,6 @@ class Order implements ShouldQueue {
     public function handleWithRESTAPI() {
         try{
             $since_id = 0;
-            $payload = [];
             do{
                 $orders_payload = [];
                 $endpoint = getShopifyURLForStore('orders.json?since_id='.$since_id, $this->store);
@@ -222,24 +221,28 @@ class Order implements ShouldQueue {
                 $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);
                 if(isset($response) && isset($response['statusCode']) && $response['statusCode'] === 200 && is_array($response) && is_array($response['body']['orders']) && count($response['body']['orders']) > 0) {
                     $payload = $response['body']['orders'];
+
                     foreach($payload as $shopifyOrderJsonArray){
                         $temp_payload = [];
                         foreach($shopifyOrderJsonArray as $key => $v)
                             $temp_payload[$key] = is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v;
+                        $endpoint_transaciton = getShopifyURLForStore('orders/'.$shopifyOrderJsonArray['id'].'/transactions.json', $this->store);
+                        $response_transaciton = $this->makeAnAPICallToShopify('GET', $endpoint_transaciton, null, $headers);
                         $temp_payload = $this->store->getOrdersPayload($temp_payload);
                         $temp_payload['store_id'] = (int) $this->store->table_id;
                         $province_and_country = $this->getShippingAddressProvinceAndCountry($shopifyOrderJsonArray);
+                        $temp_payload['payment_details'] = json_encode($response_transaciton['body']['transactions']);
                         $temp_payload = array_merge($province_and_country, $temp_payload);
                         $since_id = $shopifyOrderJsonArray['id'];
                         $orders_payload[] = $temp_payload;
-                    } 
+                    }
                     $ordersTableString = $this->getOrdersTableString($orders_payload);
                     if($ordersTableString !== null)
                         $this->insertOrders($ordersTableString);    
                 } else { $payload = null; } 
             } while($payload !== null && count($payload) > 0);
-        } catch (Exception $e) { 
-            Log::critical(['code' => $e->getCode(), 'message' => $e->getMessage(), 'trace' => json_encode($e->getTrace())]); 
+        } catch (Exception $e) {
+            Log::critical(['code' => $e->getCode(), 'message' => $e->getMessage(), 'trace' => json_encode($e->getTrace())]);
             throw $e;
         }
     }
@@ -293,7 +296,7 @@ class Order implements ShouldQueue {
             $updateString = $this->getUpdateString();
             $insertString = $this->getIndexString();
             $query = "INSERT INTO `orders` (".$insertString.") VALUES ".$ordersTableString." ON DUPLICATE KEY UPDATE ".$updateString;
-            DB::insert($query); 
+            DB::insert($query);
             return true;
         } catch(\Exception $e) {
             dd($e->getMessage().' '.$e->getLine() );

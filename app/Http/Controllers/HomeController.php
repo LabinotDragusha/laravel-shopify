@@ -68,13 +68,22 @@ class HomeController extends Controller {
     private function getDashboardPayload($user, $store) {
         try {
             $orders = $store->getOrders();
+            $orders_today = $store->getOrders()
+                ->select(['table_id', 'financial_status', 'name', 'email', 'phone', 'created_at'])
+                ->where('payment_gateway_names', 'like', '%"Mollie - iDeal"%')
+                ->orderBy('table_id', 'desc')
+                ->paginate(10);
+
+
             return [
+                'orders' => $orders_today,
                 'orders_count' => $orders->count() ?? 0,
                 'orders_revenue' => $orders->sum('total_price') ?? 0,
                 'customers_count' => $store->getCustomers()->count() ?? 0
             ];
         } catch(Exception $e) {
             return [
+                'orders' => 'orders not found',
                 'orders_count' => 0,
                 'orders_revenue' => 0,
                 'customers_count' => 0

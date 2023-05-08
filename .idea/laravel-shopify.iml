@@ -133,6 +133,9 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/league/flysystem" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/league/commonmark" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/storage/app" />
+      <excludeFolder url="file://$MODULE_DIR$/storage/debugbar" />
+      <excludeFolder url="file://$MODULE_DIR$/storage/framework" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -30,6 +30,7 @@ Auth::routes();
 Route::get('/', [HomeController::class, 'base']);
 
 
+
 Route::prefix('devops')->middleware(['guest:devops'])->group(function () {
     Route::get('login', [DevOpsController::class, 'devOpsLogin'])->name('devops.login');
     Route::post('login', [DevOpsController::class, 'checkLogin'])->name('devops.login.submit');
@@ -78,6 +79,7 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::post('products/publish', [ProductsController::class, 'publishProduct'])->name('shopify.product.publish');
         });
         Route::middleware('permission:write-orders|read-orders')->group(function () {
+            Route::get('orders/edit-tag', [ShopifyController::class, 'editOrderTag'])->name('shopify.tag-order-edit');
             Route::get('orders', [ShopifyController::class,'orders'])->name('shopify.orders');
             Route::post('order/fulfill', [ShopifyController::class, 'fulfillOrder'])->name('shopify.order.fulfill');
             Route::get('order/{id}', [ShopifyController::class, 'showOrder'])->name('shopify.order.show');

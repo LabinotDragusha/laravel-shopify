@@ -28,7 +28,7 @@ class Order extends Model {
         'subtotal_price_set' => 'array',
         'tax_lines' => 'array',
         'discount_codes' => 'array',
-        'shipping_lines' => 'array'
+        'shipping_lines' => 'array',
     ];
 
     public function getOrderFulfillmentsInfo() {
@@ -59,6 +59,16 @@ class Order extends Model {
             case 'partially_refunded': return 'Partially Refunded';
             default: return $this->financial_status;
         }
+    }
+    public function getPaymentDetails() {
+        switch($this->financial_status) {
+            case 'paid': return 'Paid';
+            case 'pending': return 'COD';
+            case 'partially_refunded': return 'Partially Refunded';
+            default: return $this->financial_status;
+        }
+        $data = $this->payment_details;
+        
     }
 
     public function getFulfillmentStatus() {

@@ -38,16 +38,19 @@ class ShopifyController extends Controller {
     public function showOrder($id) {
         $user = Auth::user();
         $store = $user->getShopifyStore;
-        $order = $store->getOrders()->where('table_id', $id)->first();  
+        $order = $store->getOrders()->where('table_id', $id)->first();
         if($order->getFulfillmentOrderDataInfo()->doesntExist())
             OrderFulfillments::dispatch($user, $store, $order);
         $product_images = $store->getProductImagesForOrder($order);
+
         return view('orders.show', [
-            'order_currency' => getCurrencySymbol($order->currency), 
-            'product_images' => $product_images, 
+            'order_currency' => getCurrencySymbol($order->currency),
+            'product_images' => $product_images,
             'order' => $order
         ]);
     }
+
+
 
     private function getFulfillmentLineItem($request, $order) {
         try {
@@ -95,6 +98,7 @@ class ShopifyController extends Controller {
                 ];
         return $temp_payload;
     }
+
 
     private function checkIfCanBeFulfilledDirectly($fulfillment_order) {
         return in_array('request_fulfillment', $fulfillment_order->supported_actions);

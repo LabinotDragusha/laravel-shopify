@@ -15,7 +15,7 @@
                 </nav>
             </div>
             <div class="col-3" style="float:right">
-                <select id="inputState" class="form-select actions">
+                    <select id="inputState" class="form-select actions">
                     <option selected="" disabled>Actions</option>
                     <option value="fulfill_items">Fulfill Items</option>
                 </select>

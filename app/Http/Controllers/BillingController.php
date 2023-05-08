@@ -40,7 +40,7 @@ class BillingController extends Controller {
                     'name' => config('app.name').' Charge for Plan '.$plan->name,
                     'price' => (float) $plan->price,
                     'test' => 'true',
-                    'return_url' => config('app.url').'shopify/rac/accept?plan_id='.$plan->id
+                    'return_url' => config('app.url').'/shopify/rac/accept?plan_id='.$plan->id
                 ]
             ];
             $response = $this->makeAnAPICallToShopify('POST', $endpoint, null, $headers, $payload);
