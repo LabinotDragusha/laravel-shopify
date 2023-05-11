@@ -43,6 +43,10 @@ class Order extends Model {
         return is_array($this->line_items) ? $this->line_items : json_decode($this->line_items, true);
     }
 
+    public function getPayment(){
+        return is_array($this->payment_details) ? $this->payment_details : json_decode($this->payment_details, true);
+    }
+
     public function getProductIdsForLineItems() {
         $line_items = $this->getLineItems();
         $return_val = [];
@@ -61,14 +65,13 @@ class Order extends Model {
         }
     }
     public function getPaymentDetails() {
-        switch($this->financial_status) {
-            case 'paid': return 'Paid';
-            case 'pending': return 'COD';
-            case 'partially_refunded': return 'Partially Refunded';
-            default: return $this->financial_status;
-        }
-        $data = $this->payment_details;
-        
+        $payments = $this->getPayment();
+        $return_val = [];
+        if(is_array($payments) && count($payments) > 0)
+            foreach($payments as $item)
+                $return_val[] = $item['payment_details'];
+        return $return_val;
+
     }
 
     public function getFulfillmentStatus() {

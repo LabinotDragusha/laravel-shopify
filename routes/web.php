@@ -79,8 +79,8 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::post('products/publish', [ProductsController::class, 'publishProduct'])->name('shopify.product.publish');
         });
         Route::middleware('permission:write-orders|read-orders')->group(function () {
-            Route::get('orders/edit-tag', [ShopifyController::class, 'editOrderTag'])->name('shopify.tag-order-edit');
             Route::get('orders', [ShopifyController::class,'orders'])->name('shopify.orders');
+            Route::any('ordersList', [ShopifyController::class, 'listOrders'])->name('orders.list');
             Route::post('order/fulfill', [ShopifyController::class, 'fulfillOrder'])->name('shopify.order.fulfill');
             Route::get('order/{id}', [ShopifyController::class, 'showOrder'])->name('shopify.order.show');
             Route::get('order/{id}/sync', [ShopifyController::class, 'syncOrder'])->name('shopify.order.sync');

@@ -69,7 +69,7 @@ class HomeController extends Controller {
         try {
             $orders = $store->getOrders();
             $orders_today = $store->getOrders()
-                ->select(['table_id', 'financial_status', 'name', 'email', 'phone', 'created_at'])
+                ->select(['table_id', 'financial_status', 'name', 'email', 'phone', 'created_at','fulfillments', 'payment_details'])
                 ->where('payment_gateway_names', 'like', '%"Mollie - iDeal"%')
                 ->orderBy('table_id', 'desc')
                 ->paginate(10);
