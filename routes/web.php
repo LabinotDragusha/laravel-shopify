@@ -51,7 +51,7 @@ Route::middleware(['auth', 'permission:all-access'])->group(function () {
 });
 
 Route::middleware(['two_fa', 'auth'])->group(function () {
-    
+
     Route::get('dashboard', [HomeController::class, 'index'])->name('home');
 
     Route::middleware(['role:Admin', 'is_public_app'])->group(function () {
@@ -60,7 +60,7 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
         Route::any('shopify/rac/accept', [BillingController::class, 'acceptSubscriptionCharge'])->name('plan.accept');
         Route::get('consume/credits', [BillingController::class, 'consumeCredits'])->name('consume.credits');
     });
-    
+
     Route::middleware(['two_fa', 'auth', 'is_private_app'])->group(function () {
         Route::get('subscriptions', [StripeController::class, 'index'])->name('subscriptions.index');
         Route::post('add.card.user', [StripeController::class, 'addCardToUser'])->name('add.card.user');
@@ -85,16 +85,18 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::get('order/{id}', [ShopifyController::class, 'showOrder'])->name('shopify.order.show');
             Route::get('order/{id}/sync', [ShopifyController::class, 'syncOrder'])->name('shopify.order.sync');
             Route::get('sync/orders', [ShopifyController::class, 'syncOrders'])->name('orders.sync');
+            Route::get('mollie', [ShopifyController::class, 'syncOrdersMollie'])->name('mollie.sync');
+
         });
         Route::middleware('permission:write-customers|read-customers')->group(function () {
             Route::get('customers', [ShopifyController::class, 'customers'])->name('shopify.customers');
             Route::any('customerList', [ShopifyController::class, 'list'])->name('customers.list');
-            Route::get('sync/customers', [ShopifyController::class, 'syncCustomers'])->name('customers.sync');     
+            Route::get('sync/customers', [ShopifyController::class, 'syncCustomers'])->name('customers.sync');
         });
         Route::get('profile', [SettingsController::class, 'profile'])->name('my.profile');
         Route::any('accept/charge', [ShopifyController::class, 'acceptCharge'])->name('accept.charge');
     });
-    
+
     Route::get('settings', [SettingsController::class, 'settings'])->name('settings');
     Route::prefix('two_factor_auth')->group(function () {
         Route::get('/', [LoginSecurityController::class, 'show2faForm'])->name('show2FASettings');
@@ -103,11 +105,11 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
         Route::post('disable2fa', [LoginSecurityController::class, 'disable2fa'])->name('disable2fa');
         Route::middleware('two_fa')->post('/2faVerify', function () { return redirect(URL()->previous()); })->name('2faVerify');
     });
-        
+
     Route::middleware(['permission:write-members|read-members', 'is_public_app'])->group(function () {
         Route::resource('members', TeamController::class);
     });
-    
+
 });
 
 // /shopify/auth
