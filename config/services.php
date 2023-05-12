@@ -30,4 +30,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+//    'mollie' => [
+//        'client_id' => env('MOLLIE_CLIENT_ID', 'app_xxx'),
+//        'client_secret' => env('MOLLIE_CLIENT_SECRET'),
+//        'redirect' => env('MOLLIE_REDIRECT_URI'),
+//    ],
+
 ];

@@ -17,7 +17,7 @@ class HomeController extends Controller {
      * @return void
      */
     public function __construct() {
-        
+
     }
 
     public function listUsers() {
@@ -38,7 +38,7 @@ class HomeController extends Controller {
         $user = Auth::user();
         if($user->hasRole('SuperAdmin')) {
             $payload = $this->getSuperAdminDashboardPayload($user);
-            return view('superadmin.home', $payload);   
+            return view('superadmin.home', $payload);
         } else {
             $store = $user->getShopifyStore;
             $payload = $this->getDashboardPayload($user, $store);
@@ -97,14 +97,14 @@ class HomeController extends Controller {
         $response = $this->makeADockerAPICall($endpoint, $headers);
         return response()->json($response);
     }
-    
+
     public function indexElasticSearch() {
         $endpoint = getDockerURL('index/elasticsearch', 8010);
         $headers = getDockerHeaders();
         $response = $this->makeADockerAPICall($endpoint, $headers);
         return back()->with('success', 'Indexing Complete. Response '.json_encode($response));
     }
-    
+
     public function searchStore(Request $request) {
         if($request->ajax()) {
             if($request->has('searchTerm')) {
