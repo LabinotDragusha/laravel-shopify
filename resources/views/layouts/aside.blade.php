@@ -7,36 +7,16 @@
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
-      </li><!-- End Dashboard Nav -->
+      </li>
 
       <li class="nav-item">
-        <a class="nav-link" data-bs-target="#components-nav" data-bs-toggle="collapse" aria-expanded="true" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Shopify</span><i class="bi bi-chevron-down ms-auto"></i>
+        <a class="nav-link collapsed" href="{{route('shopify.orders')}}">
+          <i class="bi bi-grid"></i>
+          <span>Orders</span>
         </a>
-        <ul id="components-nav" class="nav-content collapse show" data-bs-parent="#sidebar-nav">
-          @canany(['all-access','write-orders','read-orders'])
-          <li>
-            <a href="{{route('shopify.orders')}}">
-              <i class="bi bi-circle"></i><span>Orders</span>
-            </a>
-          </li>
-          @endcanany
-          @canany(['all-access','write-products','read-products'])
-          <li>
-            <a href="{{route('shopify.products')}}">
-              <i class="bi bi-circle"></i><span>Products</span>
-            </a>
-          </li>
-          @endcanany
-          @canany(['all-access','write-customers','read-customers'])
-          <li>
-            <a href="{{route('shopify.customers')}}">
-              <i class="bi bi-circle"></i><span>Customers</span>
-            </a>
-          </li>
-          @endcanany
-        </ul>
-      </li><!-- End Components Nav -->
+      </li><!-- End Dashboard Nav -->
+
+      <!-- End Components Nav -->
       @if(Auth::user()->getShopifyStore->isPublic())
         @canany(['all-access','write-members','read-members'])
         <li class="nav-item">
