@@ -42,15 +42,17 @@ class ShopifyController extends Controller
         $user = Auth::user();
         $store = $user->getShopifyStore;
         $orders = $store->getOrders()
-                        ->select(['table_id', 'financial_status', 'name', 'email', 'phone', 'created_at', 'payment_details'])
-                        ->orderBy('table_id', 'desc')
-                        ->paginate(15);
+            ->select(['table_id', 'financial_status', 'name', 'email', 'phone', 'created_at', 'payment_details'])
+            ->orderBy('table_id', 'desc')
+            ->paginate(15);
 
         return view('orders.index', ['orders' => $orders]);
     }
-    public function listOrders(Request $request) {
+
+    public function listOrders(Request $request)
+    {
         try {
-            if($request->ajax()) {
+            if ($request->ajax()) {
                 $request = $request->all();
                 $user = Auth::user();
                 $store = $user->getShopifyStore;
@@ -68,6 +70,7 @@ class ShopifyController extends Controller
                 $query = $orders->toSql(); //For debugging the SQL query generated so far
                 $rows = $orders->get(); //Fetch from DB by using get() function
                 if($rows !== null)
+
                     foreach ($rows as $key => $item)
                         $data[] = array_merge(
                             ['#' => $key + 1], //To show the first column, NOTE: Do not show the table_id column to the viewer
@@ -76,7 +79,7 @@ class ShopifyController extends Controller
 
                 return response()->json([
                     "draw" => intval(request()->query('draw')),
-                    "recordsTotal"    => intval($count),
+                    "recordsTotal" => intval($count),
                     "recordsFiltered" => intval($count),
                     "data" => $data,
                     "debug" => [
@@ -85,8 +88,8 @@ class ShopifyController extends Controller
                     ]
                 ], 200);
             }
-        } catch(Exception $e) {
-            return response()->json(['status' => false, 'message' => $e->getMessage().' '.$e->getLine()], 500);
+        } catch (Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage() . ' ' . $e->getLine()], 500);
         }
     }
     public function filterOrders($orders, $request)
@@ -98,7 +101,6 @@ class ShopifyController extends Controller
         });
     }
     public function showOrder($id) {
-
         $user = Auth::user();
         $store = $user->getShopifyStore;
         $order = $store->getOrders()->where('table_id', $id)->first();
@@ -486,33 +488,52 @@ class ShopifyController extends Controller
 
 
 
-
-        $mollie = new MollieApiClient();
+        $mollie = new \Mollie\Api\MollieApiClient();
         $mollie->setApiKey('test_4PMxdakz6MUE2J9MaPfy2EamaGSyk2');
 
-//        $order = $mollie->shipments->listForId('ord_hvdoez');
-        $order = $mollie->orders->get('ord_udd5qh')->shipAll(
-            [
-                
-            'tracking' => [
-                'carrier' => 'PostNL',
-                'code' => '3SKABA000000000',
-                'url' => 'http://postnl.nl/tracktrace/?B=3SKABA000000000&P=1015CW&D=NL&T=C'
-            ],
+        $orders = $mollie->orders->page();
+//        $previous_orders = $most_recent_orders->next();
 
-        ]);
-// Serialize the order object to JSON
-        $content = json_encode($order);
+        $pay_id = '';
+        $transaction_id = '';
 
-// Create a new response and set the content
-        $response = new Response();
-        $response->setContent($content);
+        foreach ($orders as $key => $order) {
+//            if (!MollieOrders::where('order_id', $order->id)->exists()) {
+            $order_pay = $mollie->orders->get($order->id, ['embed' => 'payments,refunds']);
+//            $order_pay = json_encode($order_pay, true);
 
-// Set the appropriate headers
-        $response->headers->set('Content-Type', 'application/json');
+            foreach ($order_pay->_embedded->payments as $pay) {
+                $pay_id = $pay->id;
+                $transaction_id = $pay->description;
+            }
 
-// Return the response
-        return $response;
+//            $shipment = $order_pay->shipAll([
+//                'tracking' => [
+//                    'carrier' => 'PostNL',
+//                    'code' => '3SKABA000000000',
+//                    'url' => 'http://postnl.nl/tracktrace/?B=3SKABA000000000&P=1015CW&D=NL&T=C',
+//                ],
+//            ]);
+
+//            return json_encode($shipment);
+
+            $mollieData = [
+                'order_id' => $order->id,
+                'payment_method' => $order->method,
+                'payment_id' => $pay_id,
+                'transaction_id' => $transaction_id,
+                'createdAt' => $order->createdAt,
+                'givenName' => $order->billingAddress->givenName,
+                'email' => $order->billingAddress->email,
+            ];
+
+            MollieOrders::insert($mollieData);
+//            } else {
+//                break;
+//            }
+        }
+
+        return $orders;
 
     }
 
