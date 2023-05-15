@@ -51,8 +51,8 @@ class ShopifyController extends Controller
                 $store = $user->getShopifyStore;
                 $orders = $store->getOrders()
                     ->select(['table_id', 'financial_status', 'name', 'email', 'phone', 'created_at', 'payment_details','fulfillments']);//Select columns
-//                if(isset($request['search']) && isset($request['search']['value']))
-//                    $orders = $this->filterCustomers($orders, $request); //Filter customers based on the search term
+                if(isset($request['search']) && isset($request['search']['value']))
+                    $orders = $this->filterOrders($orders, $request); //Filter customers based on the search term
                 $count = $orders->count(); //Take the total count returned so far
                 $limit = $request['length'];
                 $offset = $request['start'];
@@ -83,6 +83,14 @@ class ShopifyController extends Controller
         } catch(Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage().' '.$e->getLine()], 500);
         }
+    }
+    public function filterOrders($orders, $request)
+    {
+        $term = $request['search']['value'];
+        return $orders->where(function ($query) use ($term) {
+            $query->where('name', 'LIKE', '%' . $term . '%');
+
+        });
     }
     public function showOrder($id) {
 
@@ -475,12 +483,11 @@ class ShopifyController extends Controller
 
 
         $mollie = new \Mollie\Api\MollieApiClient();
-        $mollie->setApiKey('test_Czr2sDwQSMkqRrGp66R5qRTerCQc4N');
+        $mollie->setApiKey('test_4PMxdakz6MUE2J9MaPfy2EamaGSyk2');
 
-        $most_recent_orders = $mollie->orders->page('ord_wm6x6d');
-        $previous_orders = $most_recent_orders->next();
+        $order = $mollie->orders->get("ord_udd5qh");
 
-        return ($previous_orders);
+        return ($order);
 
     }
 

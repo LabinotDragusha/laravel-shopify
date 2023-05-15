@@ -12,7 +12,7 @@
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{route('shopify.orders')}}">
           <i class="bi bi-grid"></i>
-          <span>Orders</span>
+          <span>Sync Orders</span>
         </a>
       </li><!-- End Dashboard Nav -->
 
