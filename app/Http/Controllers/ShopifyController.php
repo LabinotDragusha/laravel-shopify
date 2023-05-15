@@ -20,6 +20,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Mollie\Laravel\Facades\Mollie;
+use Mollie\Api\Resources\Payment;
+use Mollie\Api\MollieApiClient;
+use Symfony\Component\HttpFoundation\Response;
+
+
 
 
 class ShopifyController extends Controller
@@ -482,12 +487,32 @@ class ShopifyController extends Controller
 
 
 
-        $mollie = new \Mollie\Api\MollieApiClient();
+        $mollie = new MollieApiClient();
         $mollie->setApiKey('test_4PMxdakz6MUE2J9MaPfy2EamaGSyk2');
 
-        $order = $mollie->orders->get("ord_udd5qh");
+//        $order = $mollie->shipments->listForId('ord_hvdoez');
+        $order = $mollie->orders->get('ord_udd5qh')->shipAll(
+            [
+                
+            'tracking' => [
+                'carrier' => 'PostNL',
+                'code' => '3SKABA000000000',
+                'url' => 'http://postnl.nl/tracktrace/?B=3SKABA000000000&P=1015CW&D=NL&T=C'
+            ],
 
-        return ($order);
+        ]);
+// Serialize the order object to JSON
+        $content = json_encode($order);
+
+// Create a new response and set the content
+        $response = new Response();
+        $response->setContent($content);
+
+// Set the appropriate headers
+        $response->headers->set('Content-Type', 'application/json');
+
+// Return the response
+        return $response;
 
     }
 
