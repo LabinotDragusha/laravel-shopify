@@ -30,6 +30,12 @@ class CreateFulfillmentOrderDataTable extends Migration
             $table->longText('line_items')->nullable();
             $table->longText('delivery_method')->nullable();
             $table->longText('assigned_location')->nullable();
+            $table->string('assigned_service')->nullable();
+            $table->string('assigned_shipment_status')->nullable();
+            $table->string('assigned_status')->nullable();
+            $table->string('assigned_tracking_company')->nullable();
+            $table->string('assigned_tracking_number')->nullable();
+            $table->longText('assigned_tracking_numbers')->nullable();
             $table->longText('merchant_requests')->nullable();
             $table->unique(['id', 'shop_id', 'order_id', 'order_table_id']);
             $table->timestamp('created_at_date')->default(DB::raw('CURRENT_TIMESTAMP'));

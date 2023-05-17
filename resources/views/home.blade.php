@@ -239,10 +239,11 @@
 
                         <tr>
                           <th scope="row"><a href="{{route('shopify.order.show', $order->table_id)}}">{{$order->name}}</a></th>
-                          <td>{{json_decode($order->getPaymentDetails())}}</td>
-                          <td><span class="badge bg-success">{{$order->getPaymentStatus()}}</span></td>
-                          <td>{{$order->phone}}</td>
+                          <td>{{json_decode($order->payment_details)[0]->receipt->payment_id ?? 'null'}}</td>
+                          <td>{{($order->fulfillments[0]['tracking_number']) ?? 'null'}}</td>
+                          <td>{{($order->fulfillments[0]['tracking_company']) ?? 'null'}}</td>
                           <td>{{date('Y-m-d h:i:s', strtotime($order->created_at))}}</td>
+                          <td><span class="badge bg-success">{{$order->getPaymentStatus()}}</span></td>
                         </tr>
                       @endforeach
 
