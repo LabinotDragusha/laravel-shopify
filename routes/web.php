@@ -91,7 +91,7 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::get('settings/mollie', [MollieController::class, 'index'])->name('settings.mollie');
             Route::get('sync/mollie', [MollieController::class, 'syncOrdersMollie'])->name('mollie.sync');
         });
-        Route::middleware('permission:write-customers|read-customers')->group(function () {
+        Route::middleware('role:Admin')->group(function () {
             Route::get('customers', [ShopifyController::class, 'customers'])->name('shopify.customers');
             Route::any('customerList', [ShopifyController::class, 'list'])->name('customers.list');
             Route::get('sync/customers', [ShopifyController::class, 'syncCustomers'])->name('customers.sync');
