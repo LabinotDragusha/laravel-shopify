@@ -499,7 +499,7 @@ class ShopifyController extends Controller
 
         foreach ($orders as $key => $order) {
 //            if (!MollieOrders::where('order_id', $order->id)->exists()) {
-            $order_pay = $mollie->orders->get($order->id, ['embed' => 'payments,refunds']);
+            $order_pay = $mollie->orders->get('ord_9c5hih', ['embed' => 'payments,refunds']);
 //            $order_pay = json_encode($order_pay, true);
 
             foreach ($order_pay->_embedded->payments as $pay) {
@@ -507,13 +507,13 @@ class ShopifyController extends Controller
                 $transaction_id = $pay->description;
             }
 
-//            $shipment = $order_pay->shipAll([
-//                'tracking' => [
-//                    'carrier' => 'PostNL',
-//                    'code' => '3SKABA000000000',
-//                    'url' => 'http://postnl.nl/tracktrace/?B=3SKABA000000000&P=1015CW&D=NL&T=C',
-//                ],
-//            ]);
+            $mollie->shipments->update('ord_9c5hih', 'shp_9dy2g1', [
+                "tracking" => [
+                    "carrier" => "DEVDEV",
+                    "code" => "1111111",
+                    "url" => "http://postnl.nl/tracktrace/?B=3SKABA000000000&P=1015CW&D=NL&T=C",
+                ],
+            ]);
 
 //            return json_encode($shipment);
 
@@ -533,7 +533,7 @@ class ShopifyController extends Controller
 //            }
         }
 
-        return $orders;
+//        return $orders;
 
     }
 
