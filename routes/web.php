@@ -12,6 +12,7 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\WebhooksController;
+use App\Http\Controllers\MollieController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -85,8 +86,10 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::get('order/{id}', [ShopifyController::class, 'showOrder'])->name('shopify.order.show');
             Route::get('order/{id}/sync', [ShopifyController::class, 'syncOrder'])->name('shopify.order.sync');
             Route::get('sync/orders', [ShopifyController::class, 'syncOrders'])->name('orders.sync');
-            Route::get('mollie', [ShopifyController::class, 'syncOrdersMollie'])->name('mollie.sync');
-
+        });
+        Route::middleware('permission:write-orders|read-orders')->group(function () {
+            Route::get('settings/mollie', [MollieController::class, 'index'])->name('settings.mollie');
+            Route::get('sync/mollie', [MollieController::class, 'syncOrdersMollie'])->name('mollie.sync');
         });
         Route::middleware('permission:write-customers|read-customers')->group(function () {
             Route::get('customers', [ShopifyController::class, 'customers'])->name('shopify.customers');
