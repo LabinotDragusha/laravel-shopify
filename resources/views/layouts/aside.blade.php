@@ -56,7 +56,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{route('settings.mollie')}}">
-                    <i class="bi bi-cash"></i>
+                    <i class="bi bi-wrench"></i>
                     <span>Settings Mollie</span>
                 </a>
             </li>

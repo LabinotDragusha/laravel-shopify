@@ -92,7 +92,7 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::get('sync/mollie', [MollieController::class, 'syncOrdersMollie'])->name('mollie.sync');
             Route::post('/save-key', [MollieController::class, 'save'])->name('mollie.saveKey');
         });
-        Route::middleware('permission:write-customers|read-customers')->group(function () {
+        Route::middleware('role:Admin')->group(function () {
             Route::get('customers', [ShopifyController::class, 'customers'])->name('shopify.customers');
             Route::any('customerList', [ShopifyController::class, 'list'])->name('customers.list');
             Route::get('sync/customers', [ShopifyController::class, 'syncCustomers'])->name('customers.sync');
