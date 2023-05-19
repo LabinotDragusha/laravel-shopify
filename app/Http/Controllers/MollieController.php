@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\MollieOrders;
 use App\Traits\RequestTrait;
+use Illuminate\Http\Request;
+use App\Models\Store;
+use Illuminate\Support\Facades\Auth;
 
 class MollieController extends Controller
 {
@@ -12,6 +15,20 @@ class MollieController extends Controller
     public function index()
     {
         return view('mollie.index');
+    }
+
+    public function save(Request $request)
+    {
+        $key = $request->input('mollie_api');
+
+        // Save the key to the "mollie_api" column in your model
+        $user = Auth::user();
+        $store = $user->getShopifyStore;
+        $store->mollie_api = $key;
+        $store->save();
+
+        // Redirect or return a response
+        return redirect()->back()->with('success', 'Key saved successfully.');
     }
 
     public function syncOrdersMollie()
@@ -87,4 +104,6 @@ class MollieController extends Controller
         return $orders;
 
     }
+
+
 }
