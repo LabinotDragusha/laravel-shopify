@@ -15,6 +15,7 @@ class Store extends Model {
 
     protected $primaryKey = 'table_id';
 
+
     public function getCustomers() {
         return $this->hasMany(Customer::class, 'store_id', 'table_id');
     }

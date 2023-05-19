@@ -20,6 +20,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Mollie\Laravel\Facades\Mollie;
+use Mollie\Api\Resources\Payment;
+use Mollie\Api\MollieApiClient;
+use Symfony\Component\HttpFoundation\Response;
+
+
 
 
 class ShopifyController extends Controller
@@ -49,21 +54,23 @@ class ShopifyController extends Controller
         try {
             if ($request->ajax()) {
                 $request = $request->all();
-                $store = Auth::user()->getShopifyStore; //Take the auth user's shopify store
-                $customers = $store->getCustomers(); //Load the relationship (Query builder)
-                $customers = $customers->select(['first_name', 'last_name', 'email', 'phone', 'created_at']); //Select columns
-                if (isset($request['search']) && isset($request['search']['value']))
-                    $customers = $this->filterCustomers($customers, $request); //Filter customers based on the search term
-                $count = $customers->count(); //Take the total count returned so far
+                $user = Auth::user();
+                $store = $user->getShopifyStore;
+                $orders = $store->getOrders()
+                    ->select(['table_id', 'financial_status', 'name', 'email', 'phone', 'created_at', 'payment_details','fulfillments']);//Select columns
+                if(isset($request['search']) && isset($request['search']['value']))
+                    $orders = $this->filterOrders($orders, $request); //Filter customers based on the search term
+                $count = $orders->count(); //Take the total count returned so far
                 $limit = $request['length'];
                 $offset = $request['start'];
-                $customers = $customers->offset($offset)->limit($limit); //LIMIT and OFFSET logic for MySQL
-                if (isset($request['order']) && isset($request['order'][0]))
-                    $customers = $this->orderCustomers($customers, $request); //Order customers based on the column
+                $orders = $orders->offset($offset)->limit($limit); //LIMIT and OFFSET logic for MySQL
+//                if(isset($request['order']) && isset($request['order'][0]))
+//                    $customers = $this->orderCustomers($customers, $request); //Order customers based on the column
                 $data = [];
-                $query = $customers->toSql(); //For debugging the SQL query generated so far
-                $rows = $customers->get(); //Fetch from DB by using get() function
-                if ($rows !== null)
+                $query = $orders->toSql(); //For debugging the SQL query generated so far
+                $rows = $orders->get(); //Fetch from DB by using get() function
+                if($rows !== null)
+
                     foreach ($rows as $key => $item)
                         $data[] = array_merge(
                             ['#' => $key + 1], //To show the first column, NOTE: Do not show the table_id column to the viewer
@@ -85,10 +92,15 @@ class ShopifyController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage() . ' ' . $e->getLine()], 500);
         }
     }
-
-    public function showOrder($id)
+    public function filterOrders($orders, $request)
     {
+        $term = $request['search']['value'];
+        return $orders->where(function ($query) use ($term) {
+            $query->where('name', 'LIKE', '%' . $term . '%');
 
+        });
+    }
+    public function showOrder($id) {
         $user = Auth::user();
         $store = $user->getShopifyStore;
         $order = $store->getOrders()->where('table_id', $id)->first();
@@ -447,4 +459,82 @@ class ShopifyController extends Controller
         OneOrder::dispatchNow($user, $store, $order->id);
         return redirect()->route('shopify.order.show', $id)->with('success', 'Order synced!');
     }
+
+
+    public function syncOrdersMollie()
+    {
+//        try {
+//            $user = Auth::user();
+//            $store = $user->getShopifyStore;
+//            $orders = $store->getOrders()->first();
+//            $mollieOrders = MollieOrders::first();
+//
+////            foreach ($orders as $order) {
+////                $order['tracking_number'] = ;
+////            }
+//
+//        if ($orders['fulfillments'][0]['tracking_number'] == $mollieOrders['transaction_id']) {
+//            $updateMollie = [
+//                'payment_method' => 'Klarna'
+//            ];
+//            MollieOrders::where('table_id', $mollieOrders->id)->update($updateMollie);
+//            return 'success';
+//        }
+//
+//            return response()->json($orders['fulfillments'][0]['tracking_number']);
+//        } catch(Exception $e) {
+//            return($e->getMessage() . ' ' . $e->getLine());
+//        }
+
+
+
+        $mollie = new \Mollie\Api\MollieApiClient();
+        $mollie->setApiKey('test_4PMxdakz6MUE2J9MaPfy2EamaGSyk2');
+
+        $orders = $mollie->orders->page();
+//        $previous_orders = $most_recent_orders->next();
+
+        $pay_id = '';
+        $transaction_id = '';
+
+        foreach ($orders as $key => $order) {
+//            if (!MollieOrders::where('order_id', $order->id)->exists()) {
+            $order_pay = $mollie->orders->get('ord_9c5hih', ['embed' => 'payments,refunds']);
+//            $order_pay = json_encode($order_pay, true);
+
+            foreach ($order_pay->_embedded->payments as $pay) {
+                $pay_id = $pay->id;
+                $transaction_id = $pay->description;
+            }
+
+            $mollie->shipments->update('ord_9c5hih', 'shp_9dy2g1', [
+                "tracking" => [
+                    "carrier" => "DEVDEV",
+                    "code" => "1111111",
+                    "url" => "http://postnl.nl/tracktrace/?B=3SKABA000000000&P=1015CW&D=NL&T=C",
+                ],
+            ]);
+
+//            return json_encode($shipment);
+
+            $mollieData = [
+                'order_id' => $order->id,
+                'payment_method' => $order->method,
+                'payment_id' => $pay_id,
+                'transaction_id' => $transaction_id,
+                'createdAt' => $order->createdAt,
+                'givenName' => $order->billingAddress->givenName,
+                'email' => $order->billingAddress->email,
+            ];
+
+            MollieOrders::insert($mollieData);
+//            } else {
+//                break;
+//            }
+        }
+
+//        return $orders;
+
+    }
+
 }
