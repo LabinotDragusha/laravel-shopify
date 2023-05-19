@@ -2,21 +2,13 @@
 
 @section('content')
 
-    <div class="pagetitle">
-        <div class="row">
-            <div class="col-8">
-                <h1>Mollie Set Up</h1>
-            </div>
-
-        </div>
-        <div class="col-6 align-self-center">
-            <div class="card">
-                <form action="">
-                    <div class="card-title text-center">Fulfill your data</div>
-                    <input placeholder="Your order number">
-                </form>
-            </div>
-        </div>
+    <div class="form-group">
+        <form class="form-horizontal" method="POST" action="{{ route('mollie.saveKey') }}">
+            @csrf
+            <label class="control-label" for="mollie_api">Mollie API Key:</label>
+            <input type="text" name="mollie_api" id="mollie_api" class="form-control col-md-4">
+            <button class="btn btn-primary mt-3" type="submit">Save</button>
+        </form>
 
 
     </div>

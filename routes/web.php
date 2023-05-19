@@ -90,6 +90,7 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
         Route::middleware('permission:write-orders|read-orders')->group(function () {
             Route::get('settings/mollie', [MollieController::class, 'index'])->name('settings.mollie');
             Route::get('sync/mollie', [MollieController::class, 'syncOrdersMollie'])->name('mollie.sync');
+            Route::post('/save-key', [MollieController::class, 'save'])->name('mollie.saveKey');
         });
         Route::middleware('role:Admin')->group(function () {
             Route::get('customers', [ShopifyController::class, 'customers'])->name('shopify.customers');
