@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
 class Store extends Model {
-    
+
     use HasFactory;
 
     protected $guarded = [];
@@ -34,7 +34,7 @@ class Store extends Model {
 
     public function isPublic() {
         $private = isset($this->api_key) && isset($this->api_secret_key)
-                && $this->api_key !== null && $this->api_secret_key !== null  
+                && $this->api_key !== null && $this->api_secret_key !== null
                 && strlen($this->api_key) > 0 && strlen($this->api_secret_key) > 0;
 
         return !$private; // NOT Private means Public
@@ -83,12 +83,16 @@ class Store extends Model {
         return $this->fulfillment_service === 1 || $this->fulfillment_service === true;
     }
 
+    public function mollieConfig() {
+        return $this->hasMany(MollieOrders::class, 'store_id', 'table_id');
+    }
+
     /*
     public function getLocationsStorePayload() {
         $return_arr = [];
         try {
             $locations = $this->getLocations;
-            if($locations !== null && $locations->count() > 0) 
+            if($locations !== null && $locations->count() > 0)
                 foreach($locations as $location)
                     if($location->isNotAFulfillmentServiceLocation())
                         $return_arr[$location['name']] = $location;
