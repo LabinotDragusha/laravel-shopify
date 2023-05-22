@@ -46,88 +46,64 @@ class MollieController extends Controller
     {
         try {
 
-
-//            $orders = $store->getOrders()->first();
-//            $mollieOrders = MollieOrders::first();
-//
-////            foreach ($orders as $order) {
-////                $order['tracking_number'] = ;
-////            }
-//
-//        if ($orders['fulfillments'][0]['tracking_number'] == $mollieOrders['transaction_id']) {
-//            $updateMollie = [
-//                'payment_method' => 'Klarna'
-//            ];
-//            MollieOrders::where('table_id', $mollieOrders->id)->update($updateMollie);
-//            return 'success';
-//        }
-//
-//            return response()->json($orders['fulfillments'][0]['tracking_number']);
-//        } catch(Exception $e) {
-//            return($e->getMessage() . ' ' . $e->getLine());
-//        }
-
             $user = Auth::user();
             $store = $user->getShopifyStore;
 
             $mollie = new \Mollie\Api\MollieApiClient();
             $mollie->setApiKey($store->mollie_api);
 
-            $orders = $mollie->orders->page();
-//        $previous_orders = $most_recent_orders->next();
+            $orders_mollie = $mollie->orders->page();
 
             $pay_id = '';
             $transaction_id = '';
 
-            foreach ($orders as $key => $order) {
-//                if (!MollieOrders::where('order_id', $order->id)->exists()) {
-                    $order_pay = $mollie->orders->get('ord_am71b5', ['embed' => 'payments,refunds,shipments']);
-//            $order_pay = json_encode($order_pay, true);
-//
-//            return $order_pay;
+            foreach ($orders_mollie as $key => $order) {
+                $order_pay = $mollie->orders->get($order->id, ['embed' => 'payments,refunds,shipments']);
+                $shopify_payment_id = isset($order->metadata->shopify_payment_id) ? $order->metadata->shopify_payment_id : null;
+                $orders_shopify = $store->getOrders()
+                    ->where('payment_id', $shopify_payment_id)
+                    ->get();
 
+                if (!empty($order_pay->_embedded->payments)) {
+                    foreach ($order_pay->_embedded->payments as $pay) {
+                        $pay_id = $pay->id;
+                        $transaction_id = $pay->description;
+                    }
+                }
 
-                    $orders = $store->getOrders()->where('payment_details->0->receipt->payment_id', $order_pay->payment_id);  //Select columns
+                $tracking_company = isset($orders_shopify[0]->fulfillments[0]['tracking_company']) ? $orders_shopify[0]->fulfillments[0]['tracking_company'] : 'none';
+                $tracking_number = isset($orders_shopify[0]->fulfillments[0]['tracking_number']) ? $orders_shopify[0]->fulfillments[0]['tracking_number'] : '0';
+                $tracking_url = isset($orders_shopify[0]->fulfillments[0]['tracking_url']) ? $orders_shopify[0]->fulfillments[0]['tracking_url'] : 'https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html';
 
-                    return $orders;
-
-//                    if ($order_pay->payment_id == $store->getOrders)
-
-                        foreach ($order_pay->_embedded->payments as $pay) {
-                            $pay_id = $pay->id;
-                            $transaction_id = $pay->description;
-                        }
-
-                    $mollieData = [
-                        'order_id' => $order->id,
-                        'payment_method' => $order->method,
-                        'payment_id' => $pay_id,
-                        'transaction_id' => $transaction_id,
-                        'createdAt' => $order->createdAt,
-                        'givenName' => $order->billingAddress->givenName,
-                        'email' => $order->billingAddress->email,
-                    ];
-
-                    $shipment = $mollie->shipments->update($order_pay->id, 'shp_6srmnv', [
+                if (!empty($order_pay->_embedded->shipments)) {
+                    $shipment = $mollie->shipments->update($order->id, $order_pay->_embedded->shipments[0]->id, [
                         "tracking" => [
-                            "carrier" => "PostNL",
-                            "code" => $transaction_id,
-                            "url" => "http://postnl.nl/tracktrace/?B=3SKABA000000000&P=1015CW&D=NL&T=C",
+                            "carrier" => $tracking_company,
+                            "code" => $tracking_number,
+                            "url" => $tracking_url,
                         ],
                     ]);
 
                     $shipment = json_encode($shipment, true);
+                }
 
-                    MollieOrders::insert($mollieData);
-//                } else {
-//                    break;
-//                }
+                $mollieData = [
+                    'order_id' => $order_pay->id,
+                    'payment_method' => $order_pay->method,
+                    'payment_id' => $pay_id,
+                    'transaction_id' => $transaction_id,
+                    'createdAt' => $order_pay->createdAt,
+                    'givenName' => $order_pay->billingAddress->givenName,
+                    'email' => $order_pay->billingAddress->email,
+                ];
+                MollieOrders::insert($mollieData);
             }
 
-            return $orders;
+            return back()->with('success', 'Mollie sync successful');
         } catch (Exception $e) {
             return ($e->getMessage() . ' ' . $e->getLine());
         }
     }
+
 
 }

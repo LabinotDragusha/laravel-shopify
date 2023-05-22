@@ -27,7 +27,7 @@ class AddAdditionalColumnsToOrdersTable extends Migration
             $table->string('total_shipping_price_set')->nullable();
             $table->string('total_price_set')->nullable();
             $table->string('total_tax_set')->nullable();
-            $table->string('refunds')->nullable();
+            $table->longText('refunds')->nullable();
             $table->string('payment_gateway_names')->nullable();
         });
     }

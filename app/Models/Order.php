@@ -22,7 +22,7 @@ class Order extends Model {
         'total_shipping_price_set' => 'array',
         'total_price_set' => 'array',
         'total_tax_set' => 'array',
-        'refunds' => 'array',
+        'refunds' => 'string',
         'payment_gateway_names' => 'array',
         'total_discounts_set' => 'array',
         'subtotal_price_set' => 'array',
