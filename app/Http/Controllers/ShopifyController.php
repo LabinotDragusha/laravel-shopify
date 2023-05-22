@@ -24,9 +24,6 @@ use Mollie\Api\Resources\Payment;
 use Mollie\Api\MollieApiClient;
 use Symfony\Component\HttpFoundation\Response;
 
-
-
-
 class ShopifyController extends Controller
 {
 
