@@ -40,7 +40,7 @@ class OrderFulfillments implements ShouldQueue {
             $payload = [];
             do{
                 $orders_payload = [];
-                $endpoint = getShopifyURLForStore('orders/'.$this->order->id.'/fulfillment_orders.json?since_id='.$since_id, $this->store);
+                $endpoint = getShopifyURLForStore('orders/'.$this->order['id'].'/fulfillment_orders.json?since_id='.$since_id, $this->store);
                 $headers = getShopifyHeadersForStore($this->store);
                 $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);
                 if(isset($response) && isset($response['statusCode']) && $response['statusCode'] === 200 && is_array($response) && is_array($response['body']['fulfillment_orders']) && count($response['body']['fulfillment_orders']) > 0) {
@@ -50,20 +50,20 @@ class OrderFulfillments implements ShouldQueue {
                         foreach($shopifyFulfillmentOrderArray as $key => $v)
                             $temp_payload[$key] = is_array($v) ? json_encode($v) : $v;
                         $temp_payload = $this->store->getOrderFulfillmentsPayload($temp_payload);
-                        $temp_payload['order_table_id'] = (int) $this->order->table_id;                        
+                        $temp_payload['order_table_id'] = (int) $this->order['id'];
                         $orders_payload[] = $temp_payload;
                         $since_id = $shopifyFulfillmentOrderArray['id'];
-                    } 
+                    }
                     $ordersTableString = $this->getFulfillmentOrdersTableString($orders_payload);
                     if($ordersTableString !== null)
-                        $this->insertFulfillmentOrders($ordersTableString);    
-                } else { $payload = null; } 
+                        $this->insertFulfillmentOrders($ordersTableString);
+                } else { $payload = null; }
             } while($payload !== null && count($payload) > 0);
-        } catch (Exception $e) { 
-            Log::critical(['code' => $e->getCode(), 'message' => $e->getMessage(), 'trace' => json_encode($e->getTrace())]); 
+        } catch (Exception $e) {
+            Log::critical(['code' => $e->getCode(), 'message' => $e->getMessage(), 'trace' => json_encode($e->getTrace())]);
             throw $e;
         }
-        
+
     }
 
     private function getFulfillmentOrdersTableString($payload) {
@@ -86,13 +86,13 @@ class OrderFulfillments implements ShouldQueue {
     private function getUpdateString() {
         $returnString = [];
         foreach($this->indexes_to_insert as $index => $dataType)
-            $returnString[] = $index.' = VALUES(`'.$index.'`)'; 
+            $returnString[] = $index.' = VALUES(`'.$index.'`)';
         return implode(', ', $returnString);
     }
 
     private function getIndexString() {
         $returnString = [];
-        foreach($this->indexes_to_insert as $index => $dataType) 
+        foreach($this->indexes_to_insert as $index => $dataType)
             $returnString[] = '`'.$index.'`';
         return implode(', ', $returnString);
     }
@@ -103,7 +103,7 @@ class OrderFulfillments implements ShouldQueue {
             $updateString = $this->getUpdateString();
             $insertString = $this->getIndexString();
             $query = "INSERT INTO `fulfillment_order_data` (".$insertString.") VALUES ".$fulfillmentOrdersTableString." ON DUPLICATE KEY UPDATE ".$updateString;
-            DB::insert($query); 
+            DB::insert($query);
             return true;
         } catch(\Exception $e) {
             dd($e->getMessage().' '.$e->getLine() );
