@@ -250,7 +250,6 @@ class Order implements ShouldQueue
                 $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);
                 if (isset($response) && isset($response['statusCode']) && $response['statusCode'] === 200 && is_array($response) && is_array($response['body']['orders']) && count($response['body']['orders']) > 0) {
                     $payload = $response['body']['orders'];
-//                    dd($payload);
                     foreach ($payload as $shopifyOrderJsonArray) {
                         $temp_payload = [];
                         foreach ($shopifyOrderJsonArray as $key => $v)
@@ -357,4 +356,5 @@ class Order implements ShouldQueue
             return false;
         }
     }
+
 }
