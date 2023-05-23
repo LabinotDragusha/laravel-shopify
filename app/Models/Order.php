@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model {
-    
+
     use HasFactory;
     protected $guarded = [];
     public $timestamps = false;
@@ -17,7 +17,6 @@ class Order extends Model {
         'billing_address' => 'array',
         'fulfillments' => 'array',
         'customer' => 'array',
-        'shipping_lines' => 'array',
         'discount_applications' => 'array',
         'total_shipping_price_set' => 'array',
         'total_price_set' => 'array',
@@ -29,6 +28,7 @@ class Order extends Model {
         'tax_lines' => 'array',
         'discount_codes' => 'array',
         'shipping_lines' => 'array',
+        'payment_id' => 'array',
     ];
 
     public function getOrderFulfillmentsInfo() {
@@ -50,7 +50,7 @@ class Order extends Model {
     public function getProductIdsForLineItems() {
         $line_items = $this->getLineItems();
         $return_val = [];
-        if(is_array($line_items) && count($line_items) > 0) 
+        if(is_array($line_items) && count($line_items) > 0)
             foreach($line_items as $item)
                 $return_val[] = $item['product_id'];
         return $return_val;

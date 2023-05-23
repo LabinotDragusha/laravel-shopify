@@ -49,6 +49,7 @@ class OrderFulfillments implements ShouldQueue {
                         $temp_payload = [];
                         foreach($shopifyFulfillmentOrderArray as $key => $v)
                             $temp_payload[$key] = is_array($v) ? json_encode($v) : $v;
+//                        dd($shopifyFulfillmentOrderArray);
                         $temp_payload = $this->store->getOrderFulfillmentsPayload($temp_payload);
                         $temp_payload['order_table_id'] = (int) $this->order['id'];
                         $orders_payload[] = $temp_payload;

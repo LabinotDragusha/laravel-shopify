@@ -56,6 +56,7 @@ class CreateOrdersTable extends Migration
             $table->longText('shipping_address')->nullable();
             $table->longText('shipping_lines')->nullable();
             $table->longText('payment_details')->nullable();
+            $table->longText('payment_id')->nullable();
             $table->timestamp('created_at_date')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at_date')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
             //$table->timestamps();

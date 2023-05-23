@@ -250,7 +250,7 @@ class Order implements ShouldQueue
                 $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);
                 if (isset($response) && isset($response['statusCode']) && $response['statusCode'] === 200 && is_array($response) && is_array($response['body']['orders']) && count($response['body']['orders']) > 0) {
                     $payload = $response['body']['orders'];
-
+//                    dd($payload);
                     foreach ($payload as $shopifyOrderJsonArray) {
                         $temp_payload = [];
                         foreach ($shopifyOrderJsonArray as $key => $v)
@@ -262,8 +262,10 @@ class Order implements ShouldQueue
                         $temp_payload = $this->store->getOrdersPayload($temp_payload);
                         $temp_payload['store_id'] = (int)$this->store->table_id;
                         $province_and_country = $this->getShippingAddressProvinceAndCountry($shopifyOrderJsonArray);
+                        $payment_id = $this->getPaymentId($response_transaciton['body']['transactions']);
                         $temp_payload['payment_details'] = json_encode($response_transaciton['body']['transactions']);
-                        $temp_payload = array_merge($province_and_country, $temp_payload);
+                        $temp_payload = array_merge($temp_payload, $province_and_country);
+                        $temp_payload = array_merge($temp_payload, $payment_id);
                         $since_id = $shopifyOrderJsonArray['id'];
                         $orders_payload[] = $temp_payload;
                     }
@@ -312,6 +314,18 @@ class Order implements ShouldQueue
         }
     }
 
+    private function getPaymentId($shopifyOrderJsonArray)
+    {
+        try {
+            return [
+                'payment_id' => $shopifyOrderJsonArray[0]['id']
+            ];
+        } catch (Exception $e) {
+            Log::info($e->getMessage());
+            return ['payment_id' => null];
+        }
+    }
+
     private function getUpdateString()
     {
         $returnString = [];
@@ -335,6 +349,7 @@ class Order implements ShouldQueue
             $updateString = $this->getUpdateString();
             $insertString = $this->getIndexString();
             $query = "INSERT INTO `orders` (" . $insertString . ") VALUES " . $ordersTableString . " ON DUPLICATE KEY UPDATE " . $updateString;
+//            dd($query);
             DB::insert($query);
             return true;
         } catch (\Exception $e) {
