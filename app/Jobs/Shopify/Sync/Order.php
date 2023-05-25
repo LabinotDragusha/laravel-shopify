@@ -247,7 +247,7 @@ class Order implements ShouldQueue
             $store = $user->getShopifyStore;
             $orders = $store->getOrders()->select(['table_id', 'id'])->latest('table_id')->first();
             $last_id = $orders['id'] ?? '0';
-            $since_id = $last_id !== null ? $last_id + 1 : 0;
+            $since_id = $last_id !== null ? $last_id : 0;
             do {
 
                 $orders_payload = [];

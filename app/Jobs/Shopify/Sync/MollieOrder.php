@@ -28,7 +28,7 @@ class MollieOrder implements ShouldQueue
             $mollie = new \Mollie\Api\MollieApiClient();
             $mollie->setApiKey($this->store->mollie_api);
 
-            $orders_mollie = $mollie->orders->page();
+            $orders_mollie = $mollie->orders->next();
 
             $pay_id = '';
             $transaction_id = '';
