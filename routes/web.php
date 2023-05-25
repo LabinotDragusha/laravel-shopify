@@ -88,6 +88,7 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::get('sync/orders', [ShopifyController::class, 'syncOrders'])->name('orders.sync');
         });
         Route::middleware('permission:write-orders|read-orders')->group(function () {
+            Route::get('mollie/profile', [MollieController::class, 'profile'])->name('mollie.profile');
             Route::get('settings/mollie', [MollieController::class, 'index'])->name('settings.mollie');
             Route::get('sync/mollie', [MollieController::class, 'syncOrdersMollie'])->name('mollie.sync');
             Route::post('/save-key', [MollieController::class, 'save'])->name('mollie.saveKey');
@@ -97,18 +98,18 @@ Route::middleware(['two_fa', 'auth'])->group(function () {
             Route::any('customerList', [ShopifyController::class, 'list'])->name('customers.list');
             Route::get('sync/customers', [ShopifyController::class, 'syncCustomers'])->name('customers.sync');
         });
-        Route::get('profile', [SettingsController::class, 'profile'])->name('my.profile');
+//        Route::get('profile', [SettingsController::class, 'profile'])->name('my.profile');
         Route::any('accept/charge', [ShopifyController::class, 'acceptCharge'])->name('accept.charge');
     });
 
-    Route::get('settings', [SettingsController::class, 'settings'])->name('settings');
-    Route::prefix('two_factor_auth')->group(function () {
-        Route::get('/', [LoginSecurityController::class, 'show2faForm'])->name('show2FASettings');
-        Route::post('generateSecret', [LoginSecurityController::class, 'generate2faSecret'])->name('generate2faSecret');
-        Route::post('enable2fa', [LoginSecurityController::class, 'enable2fa'])->name('enable2fa');
-        Route::post('disable2fa', [LoginSecurityController::class, 'disable2fa'])->name('disable2fa');
-        Route::middleware('two_fa')->post('/2faVerify', function () { return redirect(URL()->previous()); })->name('2faVerify');
-    });
+//    Route::get('settings', [SettingsController::class, 'settings'])->name('settings');
+//    Route::prefix('two_factor_auth')->group(function () {
+//        Route::get('/', [LoginSecurityController::class, 'show2faForm'])->name('show2FASettings');
+//        Route::post('generateSecret', [LoginSecurityController::class, 'generate2faSecret'])->name('generate2faSecret');
+//        Route::post('enable2fa', [LoginSecurityController::class, 'enable2fa'])->name('enable2fa');
+//        Route::post('disable2fa', [LoginSecurityController::class, 'disable2fa'])->name('disable2fa');
+//        Route::middleware('two_fa')->post('/2faVerify', function () { return redirect(URL()->previous()); })->name('2faVerify');
+//    });
 
     Route::middleware(['permission:write-members|read-members', 'is_public_app'])->group(function () {
         Route::resource('members', TeamController::class);

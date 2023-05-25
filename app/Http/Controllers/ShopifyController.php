@@ -311,7 +311,7 @@ class ShopifyController extends Controller
 
 
     //Sync orders for Store using either GraphQL or REST API
-    public function syncOrders()
+    public static function syncOrders()
     {
         try {
             $user = Auth::user();
@@ -320,7 +320,7 @@ class ShopifyController extends Controller
             Order::dispatch($user, $store); //For using REST API
             return back()->with('success', 'Order sync successful');
         } catch (Exception $e) {
-            return response()->json(['status' => false, 'message' => 'Error :' . $e->getMessage() . ' ' . $e->getLine()]);
+            return response()->json(['status' => false, 'message' => 'Error :']);
         }
     }
 

@@ -22,20 +22,20 @@
                         </a>
                     </li>
                 @endcanany
-                @canany(['all-access','write-products','read-products'])
-                    <li>
-                        <a href="{{route('shopify.products')}}">
-                            <i class="bi bi-circle"></i><span>Products</span>
-                        </a>
-                    </li>
-                @endcanany
-                @canany(['all-access','write-customers','read-customers'])
-                    <li>
-                        <a href="{{route('shopify.customers')}}">
-                            <i class="bi bi-circle"></i><span>Customers</span>
-                        </a>
-                    </li>
-                @endcanany
+{{--                @canany(['all-access','write-products','read-products'])--}}
+{{--                    <li>--}}
+{{--                        <a href="{{route('shopify.products')}}">--}}
+{{--                            <i class="bi bi-circle"></i><span>Products</span>--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
+{{--                @endcanany--}}
+{{--                @canany(['all-access','write-customers','read-customers'])--}}
+{{--                    <li>--}}
+{{--                        <a href="{{route('shopify.customers')}}">--}}
+{{--                            <i class="bi bi-circle"></i><span>Customers</span>--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
+{{--                @endcanany--}}
             </ul>
         </li><!-- End Components Nav -->
         @if(Auth::user()->getShopifyStore->isPublic())
@@ -72,12 +72,12 @@
             </li>
             @endrole]
         @endif
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{{route('show2FASettings')}}">
-                <i class="bi bi-wrench"></i>
-                <span>Security</span>
-            </a>
-        </li><!-- End Contact Page Nav -->
+{{--        <li class="nav-item">--}}
+{{--            <a class="nav-link collapsed" href="{{route('show2FASettings')}}">--}}
+{{--                <i class="bi bi-wrench"></i>--}}
+{{--                <span>Security</span>--}}
+{{--            </a>--}}
+{{--        </li><!-- End Contact Page Nav -->--}}
 
         <li class="nav-item">
             <a class="nav-link collapsed" onclick="event.preventDefault(); document.getElementById('logout-user').submit();">
