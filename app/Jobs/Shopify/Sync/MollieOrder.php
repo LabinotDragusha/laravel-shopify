@@ -47,9 +47,26 @@ class MollieOrder implements ShouldQueue
                     }
                 }
 
-                $tracking_company = $orders_shopify[0]->fulfillments[0]['tracking_company'] ?? 'none';
-                $tracking_number = $orders_shopify[0]->fulfillments[0]['tracking_number'] ?? '0';
-                $tracking_url = $orders_shopify[0]->fulfillments[0]['tracking_url'] ?? 'https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html';
+                $tracking_company = 'none';
+                $tracking_number = '0';
+                $tracking_url = 'https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html';
+
+                if (isset($orders_shopify[0]) && isset($orders_shopify[0]->fulfillments) && count($orders_shopify[0]->fulfillments) > 0) {
+                    $lastFulfillment = $orders_shopify[0]->fulfillments[count($orders_shopify[0]->fulfillments) - 1];
+
+                    if (isset($lastFulfillment['tracking_company'])) {
+                        $tracking_company = $lastFulfillment['tracking_company'];
+                    }
+
+                    if (isset($lastFulfillment['tracking_number'])) {
+                        $tracking_number = $lastFulfillment['tracking_number'];
+                    }
+
+                    if (isset($lastFulfillment['tracking_url'])) {
+                        $tracking_url = $lastFulfillment['tracking_url'];
+                    }
+                }
+
 
                 if (!empty($order_pay->_embedded->shipments)) {
                     $shipment = $mollie->shipments->update($order->id, $order_pay->_embedded->shipments[0]->id, [

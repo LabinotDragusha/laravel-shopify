@@ -84,16 +84,22 @@
                     data: 'fulfillments',
                     name: 'fulfillments',
                     render: function(data, type, full, meta) {
-                        var value = data[0];
-                        if (value && value.tracking_number) {
-                            var value2 = value['tracking_number'] ?? 'notworking';
-                            // console.log(value2);
-                            return value2;
-                        }else {
-                            var value2 = 'Not provided';
-                            // console.log(value2);
-                            return value2;
+                        var lastValue = 'Not provided';
+
+                        for (var i = 0; i < data.length; i++) {
+                            var value = data[i];
+
+                            if (value && value.tracking_number && value.status !== 'cancelled') {
+                                lastValue = value['tracking_number'] ?? 'notworking';
+                            }
                         }
+
+// The variable `lastValue` now holds the last valid tracking number, or 'Not provided' if no valid tracking number was found.
+
+// You can uncomment the following line if you want to log `lastValue` to the console:
+// console.log(lastValue);
+
+                        return lastValue;
                     },
                     error: function(xhr, status, error) {
                         console.error('error:', error);

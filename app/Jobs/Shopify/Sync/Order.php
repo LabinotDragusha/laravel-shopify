@@ -241,15 +241,23 @@ class Order implements ShouldQueue
     public function handleWithRESTAPI()
     {
         try {
-            $since_id = 0;
+            $gateway1 = 'Mollie - Klarna Pay Later.';
+            $gateway2 = 'Mollie - iDeal';
+            $user = Auth::user();
+            $store = $user->getShopifyStore;
+            $orders = $store->getOrders()->select(['table_id', 'id'])->latest('table_id')->first();
+            $last_id = $orders['id'] ?? '0';
+            $since_id = $last_id !== null ? $last_id + 1 : 0;
             do {
-                $user = Auth::user();
+
                 $orders_payload = [];
-                $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id, $this->store);
+                $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id . '&gateway=' . $gateway1 . '&status=any' , $this->store);
+
                 $headers = getShopifyHeadersForStore($this->store, 'GET');
                 $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);
                 if (isset($response) && isset($response['statusCode']) && $response['statusCode'] === 200 && is_array($response) && is_array($response['body']['orders']) && count($response['body']['orders']) > 0) {
                     $payload = $response['body']['orders'];
+
                     foreach ($payload as $shopifyOrderJsonArray) {
                         $temp_payload = [];
                         foreach ($shopifyOrderJsonArray as $key => $v)
@@ -268,10 +276,10 @@ class Order implements ShouldQueue
                         $since_id = $shopifyOrderJsonArray['id'];
                         $orders_payload[] = $temp_payload;
                     }
-//                    dd($since_id);
                     $ordersTableString = $this->getOrdersTableString($orders_payload);
                     if ($ordersTableString !== null)
-                        $this->insertOrders($ordersTableString);
+                        dd($ordersTableString);
+                    $this->insertOrders($ordersTableString);
                 } else {
                     $payload = null;
                 }
@@ -317,7 +325,7 @@ class Order implements ShouldQueue
     {
         try {
             return [
-                'payment_id' => $shopifyOrderJsonArray[0]['id']
+                'payment_id' => $shopifyOrderJsonArray[0]['receipt']['payment_id']
             ];
         } catch (Exception $e) {
             Log::info($e->getMessage());
