@@ -28,6 +28,20 @@ class MollieController extends Controller
 
     }
 
+    public function profile(Request $request)
+    {
+        $user = Auth::user();
+        $store = $user->getShopifyStore;
+        $api_mollie = $store->mollie_api;
+
+        $mollie = new \Mollie\Api\MollieApiClient();
+        $mollie->setApiKey($api_mollie);
+
+        $profileMe = $mollie->profiles->getCurrent();
+
+        return json_encode($profileMe);
+    }
+
     public function save(Request $request)
     {
         $key = $request->input('mollie_api');
@@ -48,7 +62,6 @@ class MollieController extends Controller
 
             $user = Auth::user();
             $store = $user->getShopifyStore;
-
             MollieOrder::dispatch($user, $store);
 
             return back()->with('success', 'Mollie sync successful');
