@@ -7,6 +7,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Console\Commands\SyncOrdersCommand;
+
 
 class Kernel extends ConsoleKernel
 {
@@ -18,14 +20,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-//        $schedule->job(new Order)->everyMinute();
-
-        $schedule_task = $schedule->call(function () {
-            $orderShopify = new \App\Http\Controllers\ShopifyController();
-            $orderShopify->syncOrders();
+        $schedule->call(function () {
+            $this->call('sync:orders');
         })->everyMinute();
-
-        Log::info(json_encode($schedule_task));
     }
 
     /**
@@ -33,10 +30,7 @@ class Kernel extends ConsoleKernel
      *
      * @return void
      */
-    protected function commands()
-    {
-        $this->load(__DIR__ . '/Commands');
-
-        require base_path('routes/console.php');
-    }
+    protected $commands = [
+        SyncOrdersCommand::class,
+    ];
 }

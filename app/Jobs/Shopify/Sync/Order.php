@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Shopify\Sync;
 
+use App\Models\User;
 use App\Traits\RequestTrait;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -243,53 +244,55 @@ class Order implements ShouldQueue
         try {
             $gateway1 = 'Mollie - Klarna Pay Later.';
             $gateway2 = 'Mollie - iDeal';
-            $user = Auth::user();
-            $store = $user->getShopifyStore;
-            $orders = $store->getOrders()->select(['table_id', 'id'])->latest('table_id')->first();
-            $last_id = $orders['id'] ?? '0';
-            $since_id = $last_id !== null ? $last_id : 0;
-            do {
+            $users = User::has('getShopifyStore')->with('getShopifyStore')->get();
+            foreach ($users as $user) {
+                $store = $user->getShopifyStore;
+                $orders = $store->getOrders()->select(['table_id', 'id'])->latest('table_id')->first();
+                $last_id = $orders['id'] ?? '0';
+                $since_id = $last_id !== null ? $last_id : 0;
+                do {
 
-                $orders_payload = [];
-//                $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id . '&gateway=' . $gateway1 . '&status=any' , $this->store);
-                $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id , $this->store);
+                    $orders_payload = [];
+                $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id . '&gateway=' . $gateway1 . '&status=any' , $this->store);
+//                    $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id, $this->store);
 
-                $headers = getShopifyHeadersForStore($this->store, 'GET');
-                $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);
+                    $headers = getShopifyHeadersForStore($this->store, 'GET');
+                    $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);
 //                dd($response);
-                if (isset($response) && isset($response['statusCode']) && $response['statusCode'] === 200 && is_array($response) && is_array($response['body']['orders']) && count($response['body']['orders']) > 0) {
-                    $payload = $response['body']['orders'];
+                    if (isset($response) && isset($response['statusCode']) && $response['statusCode'] === 200 && is_array($response) && is_array($response['body']['orders']) && count($response['body']['orders']) > 0) {
+                        $payload = $response['body']['orders'];
 
-                    foreach ($payload as $shopifyOrderJsonArray) {
-                        $temp_payload = [];
-                        foreach ($shopifyOrderJsonArray as $key => $v)
-                            $temp_payload[$key] = is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v;
-                        if ($shopifyOrderJsonArray['fulfillment_status'] == 'fulfilled')
-                            OrderFulfillments::dispatch($user, $this->store, $shopifyOrderJsonArray);
-                        $endpoint_transaciton = getShopifyURLForStore('orders/' . $shopifyOrderJsonArray['id'] . '/transactions.json', $this->store);
-                        $response_transaciton = $this->makeAnAPICallToShopify('GET', $endpoint_transaciton, null, $headers);
-                        $temp_payload = $this->store->getOrdersPayload($temp_payload);
-                        $temp_payload['store_id'] = (int)$this->store->table_id;
-                        $province_and_country = $this->getShippingAddressProvinceAndCountry($shopifyOrderJsonArray);
-                        $payment_id = $this->getPaymentId($response_transaciton['body']['transactions']);
-                        $temp_payload['payment_details'] = json_encode($response_transaciton['body']['transactions']);
-                        $temp_payload = array_merge($temp_payload, $province_and_country);
-                        $temp_payload = array_merge($temp_payload, $payment_id);
-                        $since_id = $shopifyOrderJsonArray['id'];
-                        $orders_payload[] = $temp_payload;
+                        foreach ($payload as $shopifyOrderJsonArray) {
+                            $temp_payload = [];
+                            foreach ($shopifyOrderJsonArray as $key => $v)
+                                $temp_payload[$key] = is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v;
+                            if ($shopifyOrderJsonArray['fulfillment_status'] == 'fulfilled')
+                                OrderFulfillments::dispatch($user, $this->store, $shopifyOrderJsonArray);
+                            $endpoint_transaciton = getShopifyURLForStore('orders/' . $shopifyOrderJsonArray['id'] . '/transactions.json', $this->store);
+                            $response_transaciton = $this->makeAnAPICallToShopify('GET', $endpoint_transaciton, null, $headers);
+                            $temp_payload = $this->store->getOrdersPayload($temp_payload);
+                            $temp_payload['store_id'] = (int)$this->store->table_id;
+                            $province_and_country = $this->getShippingAddressProvinceAndCountry($shopifyOrderJsonArray);
+                            $payment_id = $this->getPaymentId($response_transaciton['body']['transactions']);
+                            $temp_payload['payment_details'] = json_encode($response_transaciton['body']['transactions']);
+                            $temp_payload = array_merge($temp_payload, $province_and_country);
+                            $temp_payload = array_merge($temp_payload, $payment_id);
+                            $since_id = $shopifyOrderJsonArray['id'];
+                            $orders_payload[] = $temp_payload;
+                        }
+                        $ordersTableString = $this->getOrdersTableString($orders_payload);
+                        if ($ordersTableString !== null)
+                        $this->insertOrders($ordersTableString);
+                    } else {
+                        $payload = null;
                     }
-                    $ordersTableString = $this->getOrdersTableString($orders_payload);
-                    if ($ordersTableString !== null)
-                        dd($ordersTableString);
-                    $this->insertOrders($ordersTableString);
-                } else {
-                    $payload = null;
-                }
-            } while ($payload !== null && count($payload) > 0);
+                } while ($payload !== null && count($payload) > 0);
+            }
         } catch (Exception $e) {
             Log::critical(['code' => $e->getCode(), 'message' => $e->getMessage(), 'trace' => json_encode($e->getTrace())]);
             throw $e;
         }
+
     }
 
     private function getOrdersTableString($orders_payload)
