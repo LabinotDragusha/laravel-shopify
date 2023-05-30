@@ -23,7 +23,6 @@ class CreateStoresTable extends Migration
             $table->string('address1')->nullable();
             $table->string('address2')->nullable();
             $table->string('zip')->nullable();
-            $table->string('mollie_api')->nullable();
             $table->timestamps();
         });
     }

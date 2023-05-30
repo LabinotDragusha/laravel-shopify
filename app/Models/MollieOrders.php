@@ -10,13 +10,14 @@ class MollieOrders extends Model
     use HasFactory;
 
     protected $fillable = [
-        'order_id',
+        'mollie_id',
         'payment_method',
         'payment_id',
         'transaction_id',
         'createdAt',
-        'givenName',
-        'email',
         'shipping_id',
+        'email',
+        'given_name',
+        'mollie_config_id',
     ];
 }

@@ -2,11 +2,8 @@
 
 namespace App\Console;
 
-use App\Jobs\Shopify\Sync\Order;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use App\Console\Commands\SyncOrdersCommand;
 
 
