@@ -84,7 +84,7 @@ class Store extends Model {
     }
 
     public function mollieConfig() {
-        return $this->hasMany(MollieOrders::class, 'store_id', 'table_id');
+        return $this->hasOne(MollieConfig::class, 'store_id', 'table_id');
     }
 
     /*

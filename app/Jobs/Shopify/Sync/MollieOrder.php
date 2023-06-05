@@ -26,9 +26,11 @@ class MollieOrder implements ShouldQueue
     {
         try {
             $mollie = new \Mollie\Api\MollieApiClient();
-            $mollie->setApiKey($this->store->mollie_api);
+            $mollie->setApiKey($this->store->mollieConfig->mollie_api);
 
-            $orders_mollie = $mollie->orders->next();
+//            $orders_mollie = $mollie->orders->page(null, null, ['fromDate' => date('Y-m-d')]);
+            $orders_mollie = $mollie->orders->page(null, null, ['fromDate' => '2023-05-20']);
+//            dd($orders_mollie);
 
             $pay_id = '';
             $transaction_id = '';
@@ -81,15 +83,16 @@ class MollieOrder implements ShouldQueue
                 }
 
                 $mollieData = [
-                    'order_id' => $order_pay->id,
+                    'mollie_id' => $order_pay->id,
                     'payment_method' => $order_pay->method,
                     'payment_id' => $pay_id,
                     'transaction_id' => $transaction_id,
                     'createdAt' => $order_pay->createdAt,
-                    'givenName' => $order_pay->billingAddress->givenName,
+                    'given_name' => $order_pay->billingAddress->givenName,
                     'email' => $order_pay->billingAddress->email,
+                    'mollie_config_id' => $this->store->mollieConfig->table_id
                 ];
-                MollieOrders::insert($mollieData);
+                MollieOrders::updateOrCreate($mollieData);
             }
         } catch (Exception $e) {
             Log::critical(['code' => $e->getCode(), 'message' => $e->getMessage(), 'trace' => json_encode($e->getTrace())]);

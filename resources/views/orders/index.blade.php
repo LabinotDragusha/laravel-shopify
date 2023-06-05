@@ -18,10 +18,10 @@
             </div>
             <div class="col-4">
 
-                @can('write-orders')
-                    <a href="{{route('mollie.sync')}}" style="float: right; margin-left: 10px;" class="btn btn-primary">Mollie Sync Orders</a>
-                    <a href="{{route('orders.sync')}}" style="float: right" class="btn btn-primary">Sync Orders</a>
-                @endcan
+{{--                @can('write-orders')--}}
+{{--                    <a href="{{route('mollie.sync')}}" style="float: right; margin-left: 10px;" class="btn btn-primary">Mollie Sync Orders</a>--}}
+{{--                    <a href="{{route('orders.sync')}}" style="float: right" class="btn btn-primary">Sync Orders</a>--}}
+{{--                @endcan--}}
             </div>
         </div>
     </div><!-- End Page Title -->

@@ -16,14 +16,15 @@ class MollieOrdersTable extends Migration
     {
         Schema::create('mollie_orders', function (Blueprint $table) {
             $table->bigIncrements('table_id');
-            $table->string('order_id')->nullable();
+            $table->string('mollie_id')->nullable();
             $table->string('payment_method')->nullable();
             $table->string('payment_id')->nullable();
             $table->string('transaction_id')->nullable();
             $table->string('createdAt')->nullable();
-            $table->string('givenName')->nullable();
-            $table->string('email')->nullable();
             $table->string('shipping_id')->nullable();
+            $table->string('given_name')->nullable();
+            $table->string('email')->nullable();
+            $table->string('mollie_config_id')->nullable();
             $table->timestamps();
         });
     }

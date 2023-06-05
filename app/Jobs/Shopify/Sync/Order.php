@@ -253,8 +253,8 @@ class Order implements ShouldQueue
                 do {
 
                     $orders_payload = [];
-                $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id . '&gateway=' . $gateway1 . '&status=any' , $this->store);
-//                    $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id, $this->store);
+//                $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id . '&gateway=' . $gateway1 . '&status=any' , $this->store);
+                    $endpoint = getShopifyURLForStore('orders.json?since_id=' . $since_id, $this->store);
 
                     $headers = getShopifyHeadersForStore($this->store, 'GET');
                     $response = $this->makeAnAPICallToShopify('GET', $endpoint, null, $headers);

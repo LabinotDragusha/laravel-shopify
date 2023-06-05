@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\Shopify\Sync\MollieOrder;
+use App\Models\MollieConfig;
 use App\Models\MollieOrders;
 use App\Traits\RequestTrait;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class MollieController extends Controller
         try {
             $user = Auth::user();
             $store = $user->getShopifyStore;
-            $mollie_key = $store->mollie_api ?? '';
+            $mollie_key = $store->mollieConfig->mollie_api ?? '';
 
             return view('mollie.index', compact('mollie_key'));
 
@@ -32,7 +33,7 @@ class MollieController extends Controller
     {
         $user = Auth::user();
         $store = $user->getShopifyStore;
-        $api_mollie = $store->mollie_api;
+        $api_mollie = store->mollieConfig->mollie_api;
 
         $mollie = new \Mollie\Api\MollieApiClient();
         $mollie->setApiKey($api_mollie);
@@ -49,8 +50,15 @@ class MollieController extends Controller
         // Save the key to the "mollie_api" column in your model
         $user = Auth::user();
         $store = $user->getShopifyStore;
-        $store->mollie_api = $key;
-        $store->save();
+//        $store->mollie_api = $key;
+        $mollieConfig = [
+            'store_id' => $user->getShopifyStore->table_id,
+            'mollie_api' => $key
+        ];
+
+        MollieConfig::updateOrCreate($mollieConfig);
+//        dd($store->mollieConfig);
+//        $store->save();
 
         // Redirect or return a response
         return redirect()->back()->with('success', 'Key saved successfully.');
