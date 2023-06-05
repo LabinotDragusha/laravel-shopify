@@ -69,6 +69,4 @@ class MollieController extends Controller
             return ($e->getMessage() . ' ' . $e->getLine());
         }
     }
-
-
 }
